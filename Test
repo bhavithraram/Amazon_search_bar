@@ -1,43 +1,69 @@
 package bhavi.java;
 
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
-public class AmazonSoundbarSearch {
+public class Amazon_lgSoundBar {
     public static void main(String[] args) {
-        
         WebDriver driver = new ChromeDriver();
-
+        
         try {
-           
+            driver.manage().window().maximize();  // Maximize the browser window
             driver.get("https://www.amazon.in");
-            WebElement searchBox = driver.findElement(By.id("twotabsearchtextbox"));
-            searchBox.sendKeys("lg soundbar");
-            searchBox.submit();
 
-          
-            List<WebElement> productNames = driver.findElements(By.cssSelector("span.a-text-normal"));
+            // Search for "lg soundbar"
+            driver.findElement(By.id("twotabsearchtextbox")).sendKeys("lg soundbar");
+            driver.findElement(By.id("twotabsearchtextbox")).submit();
+
+            // Add implicit wait of 5 seconds
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+
+            // Extract product names and prices
+            List<WebElement> productNames = driver.findElements(By.cssSelector("span.a-size-medium.a-color-base.a-text-normal"));
             List<WebElement> productPrices = driver.findElements(By.cssSelector("span.a-price-whole"));
 
-           
+            List<Product> products = new ArrayList<>();
+
             for (int i = 0; i < productNames.size(); i++) {
-                productNames.get(i).getText();
-                String productPrice = (i < productPrices.size()) ? productPrices.get(i).getText().replace(",", "") : "0";
-
-               
-                String wattage = i % 2 == 0 ? "200 Watt" : "300 Watt";
-
-               
-                System.out.println(productPrice + " LG soundbar " + wattage);
+                String name = productNames.get(i).getText().split(",")[0]; // Taking only the first part of the name
+                String price = (i < productPrices.size()) ? productPrices.get(i).getText().replace(",", "") : "0";
+                products.add(new Product(name, Integer.parseInt(price)));
             }
+
+            // Sort products by price
+            products.sort((p1, p2) -> Integer.compare(p1.price, p2.price));
+
+            // Print product name and price
+            for (Product product : products) {
+                System.out.println(product.price + " " + product.name);
+            }
+        } catch (NoSuchElementException e) {
+            System.err.println("Element not found: " + e.getMessage());
+        } catch (TimeoutException e) {
+            System.err.println("Operation timed out: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("An error occurred: " + e.getMessage());
         } finally {
-           
             driver.quit();
+        }
+    }
+
+    // Helper class to store product name and price
+    static class Product {
+        String name;
+        int price;
+
+        Product(String name, int price) {
+            this.name = name;
+            this.price = price;
         }
     }
 }
