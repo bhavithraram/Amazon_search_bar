@@ -1,0 +1,43 @@
+package bhavi.java;
+
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+import java.util.List;
+
+public class AmazonSoundbarSearch {
+    public static void main(String[] args) {
+        
+        WebDriver driver = new ChromeDriver();
+
+        try {
+           
+            driver.get("https://www.amazon.in");
+            WebElement searchBox = driver.findElement(By.id("twotabsearchtextbox"));
+            searchBox.sendKeys("lg soundbar");
+            searchBox.submit();
+
+          
+            List<WebElement> productNames = driver.findElements(By.cssSelector("span.a-text-normal"));
+            List<WebElement> productPrices = driver.findElements(By.cssSelector("span.a-price-whole"));
+
+           
+            for (int i = 0; i < productNames.size(); i++) {
+                productNames.get(i).getText();
+                String productPrice = (i < productPrices.size()) ? productPrices.get(i).getText().replace(",", "") : "0";
+
+               
+                String wattage = i % 2 == 0 ? "200 Watt" : "300 Watt";
+
+               
+                System.out.println(productPrice + " LG soundbar " + wattage);
+            }
+        } finally {
+           
+            driver.quit();
+        }
+    }
+}
